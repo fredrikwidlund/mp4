@@ -97,52 +97,47 @@ void mp4_atom_type(atom *a)
   printf("\n");
 }
 
-/*
-typedef struct atom_sidx atom_sidx;
-struct __attribute__((__packed__)) atom_sidx
-{
-  uint8_t  v;
-  uint8_t  x[3];
-  uint32_t id;
-  uint32_t timescale;
-  uint64_t ept;
-  uint64_t offset;
-  uint16_t reserved;
-  uint16_t ref;
-  uint32_t type:1;
-  uint32_t size:31;
-  uint32_t duration;
-  uint32_t sap_type:3;
-  uint32_t sap_delta_time:28;
-};
-*/
-
 void mp4_atom_sidx(atom *a)
 {
   bytes *b;
-  uint32_t v;
+  int version, i;
+  uint16_t reference_count;
+  uint32_t reference_id, timescale;
+  uint64_t earliest_presentation_time, first_offset;
 
   b = &a->bytes;
-  printf("%lu\n", bytes_size(b));
-  printf("%*s- ", mp4_atom_level(a) * 4, "");
-  printf("version %u", bytes_pop8(b));
+
+  version = bytes_pop8(b);
   bytes_pop(b, NULL, 3);
-  printf(", id %u", bytes_pop32(b));
-  printf(", timescale %u", bytes_pop32(b));
-  printf(", ept %lu", bytes_pop64(b));
-  printf(", offset %lu", bytes_pop64(b));
+  reference_id = bytes_pop32(b);
+  timescale = bytes_pop32(b);
+  earliest_presentation_time = version == 0 ? bytes_pop32(b) : bytes_pop64(b);
+  first_offset = version == 0 ? bytes_pop32(b) : bytes_pop64(b);;
   bytes_pop(b, NULL, 2);
-  printf(", ref %u", bytes_pop16(b));
-  v = bytes_pop32(b);
-  printf(", type %u", v >> 31);
-  printf(", size %u", v & ~(1 << 31));
-  printf(", duration %u", bytes_pop32(b));
-  v = bytes_pop32(b);
-  printf(", sap type %u", v >> 29);
-  printf(", sap delta time %u", v & ~(7 << 29));
+  reference_count = bytes_pop16(b);
+
+  printf("%*s- id %u, timescale %u\n", mp4_atom_level(a) * 4, "", reference_id, timescale);
+  printf("%*s- ept %lu, offset %lu\n", mp4_atom_level(a) * 4, "", earliest_presentation_time, first_offset);
+  printf("%*s- reference count %u\n", mp4_atom_level(a) * 4, "", reference_count);
+
+  for (i = 0; i < reference_count; i ++)
+    {
+      uint32_t v;
+
+      printf("%*s  - [%d]\n", mp4_atom_level(a) * 4, "", i);
+      v = bytes_pop32(b);
+      printf("%*s    - reference type %u\n", mp4_atom_level(a) * 4, "", v >> 31);
+      printf("%*s    - referenced size %u\n", mp4_atom_level(a) * 4, "", (v << 1) >> 1);
+      v = bytes_pop32(b);
+      printf("%*s    - subsegment duration %u\n", mp4_atom_level(a) * 4, "", v);
+      v = bytes_pop32(b);
+      printf("%*s    - starts with sap %u\n", mp4_atom_level(a) * 4, "", v >> 31);
+      printf("%*s    - sap type %u\n", mp4_atom_level(a) * 4, "", (v << 1) >> 29);
+      printf("%*s    - sap delta time %u\n", mp4_atom_level(a) * 4, "", (v << 4) >> 4);
+      (void) v;
+    }
 
   assert(bytes_size(b) == 0 && bytes_valid(b));
-  printf("\n");
 }
 
 void mp4_atom_parse(atom *a)
