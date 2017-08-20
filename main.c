@@ -8,17 +8,19 @@
 #include <assert.h>
 #include <sys/stat.h>
 
+#include <dynamic.h>
+
 #include "bytes.h"
-#include "mp4.h"
+#include "mp4_atom.h"
 
 int main(int argc, char **argv)
 {
-  mp4 mp4;
-  int e;
+  mp4_atom *atom;
 
-  e = mp4_open(&mp4, argv[1]);
-  if (e == -1)
-    err(1, "mp4_open");
+  atom = mp4_atom_load(argv[1]);
+  if (!atom)
+    err(1, "mp4_atom_load");
 
-  mp4_clear(&mp4);
+  mp4_atom_debug(atom);
+  mp4_atom_release(atom);
 }
