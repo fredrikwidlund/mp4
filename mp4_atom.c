@@ -18,20 +18,22 @@ int mp4_atom_level(mp4_atom *atom)
 mp4_atom *mp4_atom_load(char *path)
 {
   mp4_atom *atom;
-  bytes bytes;
+  bytes bytes, parse;
   int e;
 
   e = bytes_open(&bytes, path);
   if (e == -1)
     return NULL;
 
-  atom = mp4_atom_unpack(&bytes, "root", NULL);
+  parse = bytes;
+  atom = mp4_atom_unpack(&parse, "root", NULL);
   if (!atom)
     return NULL;
+  bytes_clear(&bytes);
 
-  if (bytes_size(&bytes) || !bytes_valid(&bytes))
+  if (bytes_size(&parse) || !bytes_valid(&parse))
     {
-      mp4_atom_release(atom);
+      mp4_atom_delete(atom);
       return NULL;
     }
 
@@ -46,14 +48,12 @@ mp4_atom *mp4_atom_unpack(bytes *bytes, mp4_atom_type type, mp4_atom *parent)
   return descriptor ? descriptor->unpack(bytes, type, parent) : NULL;
 }
 
-void mp4_atom_release(mp4_atom *atom)
+void mp4_atom_delete(mp4_atom *atom)
 {
-  mp4_atom_base *base = atom;
-  base->descriptor->release(atom);
+  mp4_atom_base_delete(atom);
 }
 
 void mp4_atom_debug(mp4_atom *atom)
 {
-  mp4_atom_base *base = atom;
-  base->descriptor->debug(atom);
+  mp4_atom_base_debug(atom);
 }

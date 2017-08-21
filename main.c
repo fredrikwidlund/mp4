@@ -22,5 +22,5 @@ int main(int argc, char **argv)
     err(1, "mp4_atom_load");
 
   mp4_atom_debug(atom);
-  mp4_atom_release(atom);
+  mp4_atom_delete(atom);
 }

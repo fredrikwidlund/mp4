@@ -2,52 +2,87 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <assert.h>
 
 #include <dynamic.h>
 
 #include "bytes.h"
 #include "mp4_atom.h"
-#include "mp4_desc.h"
+#include "mp4_atom_descriptor.h"
+#include "mp4_atom_base.h"
+#include "mp4_atom_types.h"
 
-typedef struct mp4_atom_types mp4_atom_types;
-struct mp4_atom_types
+static void mp4_atom_types_delete(mp4_atom *atom)
 {
-  mp4_atom      base;
-  size_t        count;
-  mp4_atom_type types[];
-};
-
-static mp4_atom *unpack(mp4_desc *desc, bytes *bytes, mp4_atom_type type, mp4_atom *parent)
-{
-  mp4_atom_types *atom;
-  size_t count;
-
-  assert(bytes_size(bytes) % 4 == 0);
-  count = bytes_size(bytes) / 4;
-  atom = calloc(1, sizeof *atom + (count * sizeof atom->types[0]));
-  assert(atom);
-  atom->base = (mp4_atom) {type, parent, desc};
-  atom->count = count;
-  memcpy(atom->types, bytes_base(bytes), bytes_size(bytes));
-  return &atom->base;
+  mp4_atom_types_destruct(atom);
+  free(atom);
 }
 
-static void debug(mp4_atom *base)
+static mp4_atom *mp4_atom_types_unpack(bytes *bytes, mp4_atom_type type, mp4_atom *parent)
 {
-  mp4_atom_types *atom = (mp4_atom_types *) base;
+  mp4_atom_types *types;
+  mp4_atom_type brand;
 
+  types = mp4_atom_types_new(type, parent);
+  bytes_pop(bytes, (uint8_t *) types->brand, sizeof brand);
+  types->minor_version = bytes_pop32(bytes);
+
+  while (bytes_size(bytes))
+    {
+      bytes_pop(bytes, (uint8_t *) brand, sizeof brand);
+      vector_push_back(&types->compatible, &brand);
+    }
+
+  if (!bytes_valid(bytes))
+    {
+      mp4_atom_types_delete(types);
+      return NULL;
+    }
+
+  return types;
+}
+
+static void mp4_atom_types_debug(mp4_atom *atom)
+{
+  mp4_atom_types *types = atom;
   size_t i;
 
-  printf("[%.*s]\n", (int) sizeof(base->type), base->type.name);
-  printf("- types");
-   for (i = 0; i < atom->count; i ++)
-     printf(" '%.*s'", (int) sizeof (atom->types[i]), atom->types[i].name);
-  printf("\n");
+  mp4_atom_base_indent(stderr, atom);
+  (void) fprintf(stderr, "[%.*s]\n", (int) sizeof (mp4_atom_type), mp4_atom_base_type(atom));
+  mp4_atom_base_indent(stderr, atom);
+  (void) fprintf(stderr, "- brand %.*s, version %u, compatible", (int) sizeof types->brand, types->brand, types->minor_version);
+  for (i = 0; i < vector_size(&types->compatible); i ++)
+    (void) fprintf(stderr, " %.*s%s", (int) sizeof (mp4_atom_type), (char *) vector_at(&types->compatible, i),
+                   i < vector_size(&types->compatible) - 1 ? "," : "");
+  (void) fprintf(stderr, "\n");
 }
 
-mp4_desc mp4_atom_types_desc =
+mp4_atom_descriptor mp4_atom_types_descriptor =
 {
-  .unpack = unpack,
-  .debug = debug
+  .unpack = mp4_atom_types_unpack,
+  .delete = mp4_atom_types_delete,
+  .debug = mp4_atom_types_debug
 };
+
+mp4_atom *mp4_atom_types_new(mp4_atom_type type, mp4_atom *parent)
+{
+  mp4_atom_types *types;
+
+  types = calloc(1, sizeof *types);
+  mp4_atom_types_construct(types, type, parent, &mp4_atom_types_descriptor);
+  return types;
+}
+
+void mp4_atom_types_construct(mp4_atom_types *types, mp4_atom_type type, mp4_atom *parent,
+                              mp4_atom_descriptor *descriptor)
+{
+  mp4_atom_base_construct(&types->base, type, parent, descriptor);
+  memset(types->brand, 0, sizeof types->brand);
+  types->minor_version = 0;
+  vector_construct(&types->compatible, sizeof (mp4_atom_type));
+}
+
+void mp4_atom_types_destruct(mp4_atom_types *types)
+{
+  mp4_atom_base_destruct(&types->base);
+  vector_destruct(&types->compatible);
+}

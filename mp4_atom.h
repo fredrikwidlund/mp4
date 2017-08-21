@@ -7,7 +7,7 @@ typedef void    mp4_atom;
 
 mp4_atom *mp4_atom_unpack(bytes *, mp4_atom_type, mp4_atom *);
 mp4_atom *mp4_atom_load(char *);
-void      mp4_atom_release(mp4_atom *);
+void      mp4_atom_delete(mp4_atom *);
 void      mp4_atom_debug(mp4_atom *);
 int       mp4_atom_level(mp4_atom *);
 

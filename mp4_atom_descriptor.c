@@ -7,8 +7,6 @@
 #include "mp4_atom.h"
 #include "mp4_atom_descriptor.h"
 
-//#include "atom/mp4_atom_types.h"
-
 typedef struct mp4_atom_descriptor_map mp4_atom_descriptor_map;
 struct mp4_atom_descriptor_map
 {
@@ -17,13 +15,23 @@ struct mp4_atom_descriptor_map
 };
 
 extern mp4_atom_descriptor mp4_atom_container_descriptor;
+extern mp4_atom_descriptor mp4_atom_store_descriptor;
+extern mp4_atom_descriptor mp4_atom_types_descriptor;
+extern mp4_atom_descriptor mp4_atom_sidx_descriptor;
 
 static mp4_atom_descriptor_map maps[] =
   {
     {"root", &mp4_atom_container_descriptor},
+    {"moov", &mp4_atom_container_descriptor},
     {"moof", &mp4_atom_container_descriptor},
-    //    {"styp", &mp4_atom_types_desc},
-    {"", NULL}
+    {"mdia", &mp4_atom_container_descriptor},
+    {"minf", &mp4_atom_container_descriptor},
+    {"stbl", &mp4_atom_container_descriptor},
+    {"trak", &mp4_atom_container_descriptor},
+    {"ftyp", &mp4_atom_types_descriptor},
+    {"styp", &mp4_atom_types_descriptor},
+    {"sidx", &mp4_atom_sidx_descriptor},
+    {"", &mp4_atom_store_descriptor},
   };
 
 /*
@@ -47,8 +55,8 @@ mp4_atom_descriptor *mp4_atom_descriptor_lookup(mp4_atom_type type)
 {
   mp4_atom_descriptor_map *map;
 
-  for (map = maps; map->descriptor; map ++)
-    if (*(uint32_t *) (map->type) == *(uint32_t *) type)
+  for (map = maps;; map ++)
+    if (*(uint32_t *) (map->type) == *(uint32_t *) type || !map->type[0])
       return map->descriptor;
 
   return NULL;
