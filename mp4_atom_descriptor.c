@@ -18,6 +18,7 @@ extern mp4_atom_descriptor mp4_atom_container_descriptor;
 extern mp4_atom_descriptor mp4_atom_store_descriptor;
 extern mp4_atom_descriptor mp4_atom_types_descriptor;
 extern mp4_atom_descriptor mp4_atom_sidx_descriptor;
+extern mp4_atom_descriptor mp4_atom_mfhd_descriptor;
 
 static mp4_atom_descriptor_map maps[] =
   {
@@ -28,9 +29,11 @@ static mp4_atom_descriptor_map maps[] =
     {"minf", &mp4_atom_container_descriptor},
     {"stbl", &mp4_atom_container_descriptor},
     {"trak", &mp4_atom_container_descriptor},
+    {"traf", &mp4_atom_container_descriptor},
     {"ftyp", &mp4_atom_types_descriptor},
     {"styp", &mp4_atom_types_descriptor},
     {"sidx", &mp4_atom_sidx_descriptor},
+    {"mfhd", &mp4_atom_mfhd_descriptor},
     {"", &mp4_atom_store_descriptor},
   };
 
