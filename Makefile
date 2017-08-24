@@ -10,6 +10,9 @@ ATOMS   += atom/mp4_atom_store.o
 ATOMS   += atom/mp4_atom_types.o
 ATOMS   += atom/mp4_atom_sidx.o
 ATOMS   += atom/mp4_atom_mfhd.o
+ATOMS   += atom/mp4_atom_tfhd.o
+ATOMS   += atom/mp4_atom_tfdt.o
+ATOMS   += atom/mp4_atom_trun.o
 
 $(PROG): $(OBJS) $(ATOMS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDADD)

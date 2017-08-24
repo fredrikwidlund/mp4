@@ -19,6 +19,9 @@ extern mp4_atom_descriptor mp4_atom_store_descriptor;
 extern mp4_atom_descriptor mp4_atom_types_descriptor;
 extern mp4_atom_descriptor mp4_atom_sidx_descriptor;
 extern mp4_atom_descriptor mp4_atom_mfhd_descriptor;
+extern mp4_atom_descriptor mp4_atom_tfhd_descriptor;
+extern mp4_atom_descriptor mp4_atom_tfdt_descriptor;
+extern mp4_atom_descriptor mp4_atom_trun_descriptor;
 
 static mp4_atom_descriptor_map maps[] =
   {
@@ -34,6 +37,9 @@ static mp4_atom_descriptor_map maps[] =
     {"styp", &mp4_atom_types_descriptor},
     {"sidx", &mp4_atom_sidx_descriptor},
     {"mfhd", &mp4_atom_mfhd_descriptor},
+    {"tfhd", &mp4_atom_tfhd_descriptor},
+    {"tfdt", &mp4_atom_tfdt_descriptor},
+    {"trun", &mp4_atom_trun_descriptor},
     {"", &mp4_atom_store_descriptor},
   };
 

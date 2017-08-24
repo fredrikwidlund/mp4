@@ -65,6 +65,8 @@ static void mp4_atom_sidx_debug(mp4_atom *atom)
   mp4_atom_base_indent(stderr, atom);
   (void) fprintf(stderr, "[%.*s]\n", (int) sizeof (mp4_atom_type), mp4_atom_base_type(atom));
   mp4_atom_base_indent(stderr, atom);
+  (void) fprintf(stderr, "- version %u\n", sidx->version);
+  mp4_atom_base_indent(stderr, atom);
   (void) fprintf(stderr, "- reference_id %u\n", sidx->reference_id);
   mp4_atom_base_indent(stderr, atom);
   (void) fprintf(stderr, "- timescale %u\n", sidx->timescale);
@@ -74,17 +76,16 @@ static void mp4_atom_sidx_debug(mp4_atom *atom)
   (void) fprintf(stderr, "- first offset %lu\n", sidx->first_offset);
 
   reference = vector_data(&sidx->references);
-  for (i = 1; i <= sidx->reference_count; i ++)
+  for (i = 0; i < sidx->reference_count; i ++)
     {
       mp4_atom_base_indent(stderr, atom);
-      (void) fprintf(stderr, "  [reference %lu]\n", i);
+      (void) fprintf(stderr, "  [reference %lu]\n", i + 1);
       mp4_atom_base_indent(stderr, atom);
-      (void) fprintf(stderr, "  - reference type %u\n", reference->reference_type);
+      (void) fprintf(stderr, "  - reference type %u\n", reference[i].reference_type);
       mp4_atom_base_indent(stderr, atom);
-      (void) fprintf(stderr, "  - referenced size %u\n", reference->referenced_size);
+      (void) fprintf(stderr, "  - referenced size %u\n", reference[i].referenced_size);
       mp4_atom_base_indent(stderr, atom);
-      (void) fprintf(stderr, "  - subsegment duration %f\n", (float) reference->subsegment_duration / sidx->timescale);
-      
+      (void) fprintf(stderr, "  - subsegment duration %f\n", (float) reference[i].subsegment_duration / sidx->timescale);
     }
 }
 
