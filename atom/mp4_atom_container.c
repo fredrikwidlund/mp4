@@ -94,7 +94,7 @@ void mp4_atom_container_construct(mp4_atom_container *container, mp4_atom_type t
 void mp4_atom_container_destruct(mp4_atom_container *container)
 {
   mp4_atom_base_destruct(&container->base);
-  vector_destruct(&container->children);
+  vector_destruct(&container->children, NULL);
 }
 
 void mp4_atom_container_add(mp4_atom_container *container, mp4_atom *atom)

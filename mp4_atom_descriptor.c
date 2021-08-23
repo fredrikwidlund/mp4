@@ -23,7 +23,7 @@ extern mp4_atom_descriptor mp4_atom_tfhd_descriptor;
 extern mp4_atom_descriptor mp4_atom_tfdt_descriptor;
 extern mp4_atom_descriptor mp4_atom_trun_descriptor;
 
-static mp4_atom_descriptor_map maps[] =
+static mp4_atom_descriptor_map mp4_maps[] =
   {
     {"root", &mp4_atom_container_descriptor},
     {"moov", &mp4_atom_container_descriptor},
@@ -64,7 +64,7 @@ mp4_atom_descriptor *mp4_atom_descriptor_lookup(mp4_atom_type type)
 {
   mp4_atom_descriptor_map *map;
 
-  for (map = maps;; map ++)
+  for (map = mp4_maps;; map ++)
     if (*(uint32_t *) (map->type) == *(uint32_t *) type || !map->type[0])
       return map->descriptor;
 

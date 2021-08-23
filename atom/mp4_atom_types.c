@@ -84,5 +84,5 @@ void mp4_atom_types_construct(mp4_atom_types *types, mp4_atom_type type, mp4_ato
 void mp4_atom_types_destruct(mp4_atom_types *types)
 {
   mp4_atom_base_destruct(&types->base);
-  vector_destruct(&types->compatible);
+  vector_destruct(&types->compatible, NULL);
 }

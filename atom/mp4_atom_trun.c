@@ -137,5 +137,5 @@ void mp4_atom_trun_construct(mp4_atom_trun *trun, mp4_atom_type type, mp4_atom *
 void mp4_atom_trun_destruct(mp4_atom_trun *trun)
 {
   mp4_atom_base_destruct(&trun->base);
-  vector_destruct(&trun->samples);
+  vector_destruct(&trun->samples, NULL);
 }
